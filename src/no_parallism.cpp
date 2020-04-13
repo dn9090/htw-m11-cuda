@@ -137,7 +137,7 @@ int op_emboss(uint32_t width, uint32_t height, uint32_t *data)
 	return EXIT_SUCCESS;
 }
 
-#define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0), 255.0)
+#define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
 
 /*
  * Applies a gaussian blur filter to the image.
@@ -158,17 +158,17 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 	};
 	*/
 
-	double filter[filter_size][filter_size] =
+	float filter[filter_size][filter_size] =
 	{
-		{1,  4,  6,  4,  1},
-		{4, 16, 24, 16,  4},
-		{6, 24, 36, 24,  6},
-		{4, 16, 24, 16,  4},
-		{1,  4,  6,  4,  1}
+		{1.0f,  4.0f,  6.0f,  4.0f,  1.0f},
+		{4.0f, 16.0f, 24.0f, 16.0f,  4.0f},
+		{6.0f, 24.0f, 36.0f, 24.0f,  6.0f},
+		{4.0f, 16.0f, 24.0f, 16.0f,  4.0f},
+		{1.0f,  4.0f,  6.0f,  4.0f,  1.0f}
 	};
 
-	double filter_factor = 1.0 / 256.0;
-	double filter_bias = 0.0;
+	float filter_factor = 1.0f / 256.0f;
+	float filter_bias = 0.0f;
 
 	for(int32_t row = height - 1; row >= 0; --row)
 	{
@@ -176,7 +176,7 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 		{
 			uint32_t index = ARRAY2_IDX(row, col, width);
 
-			double red = 0, green = 0, blue = 0, alpha = 0;
+			float red = 0, green = 0, blue = 0, alpha = 0;
 
 			for(int32_t filter_y = 0; filter_y < filter_size; ++filter_y)
 			{
@@ -194,10 +194,10 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 
 					int32_t filter_idx = ARRAY2_IDX(filter_y_idx, filter_x_idx, width);
 
-					red += filter[filter_y][filter_x] * ((double)RED8(data[filter_idx]));
-					green += filter[filter_y][filter_x] * ((double)GREEN8(data[filter_idx]));
-					blue += filter[filter_y][filter_x] * ((double)BLUE8(data[filter_idx]));
-					alpha += filter[filter_y][filter_x] * ((double)ALPHA8(data[filter_idx]));
+					red += filter[filter_y][filter_x] * ((float)RED8(data[filter_idx]));
+					green += filter[filter_y][filter_x] * ((float)GREEN8(data[filter_idx]));
+					blue += filter[filter_y][filter_x] * ((float)BLUE8(data[filter_idx]));
+					alpha += filter[filter_y][filter_x] * ((float)ALPHA8(data[filter_idx]));
 				}
 			}
 
