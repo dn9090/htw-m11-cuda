@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <cstring>
+#include <time.h>
 #include <opencv2/opencv.hpp>
 #include "shared.hpp"
 #include "img_operations.hpp"
@@ -61,31 +62,52 @@ int main(int argc, char **argv)
 	uint32_t *im = mat_to_flat_array(mat_in);
 	Mat mat_out;
 
+	clock_t clock_start, clock_end;
+	
+	ios_base::sync_with_stdio(false); 
+
 	if(OPT(argv[1], "grey"))
 	{
+		clock_start = clock();
 		op_grey(mat_in.cols, mat_in.rows, im);
+		clock_end = clock();
+
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
 	} else if(OPT(argv[1], "emboss")) {
+		clock_start = clock();
 		op_emboss(mat_in.cols, mat_in.rows, im);
+		clock_end = clock();
+
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
 	} else if(OPT(argv[1], "blur")) {
+		clock_start = clock();
 		op_blur(mat_in.cols, mat_in.rows, im);
+		clock_end = clock();
+
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
 	} else if(OPT(argv[1], "hsv")) {
+		clock_start = clock();
 		op_hsv(mat_in.cols, mat_in.rows, im);
+		clock_end = clock();
+
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC3, im);
 		Mat tmp = Mat(mat_in.rows, mat_in.cols, CV_8UC3);
 		cvtColor(mat_out, tmp, COLOR_HSV2RGB);
 		mat_out = tmp;
 	}
 
-	printf("The operation was successful. Exporting file...\n");
+	ios_base::sync_with_stdio(true);
+
+	double cpu_time_taken = double(clock_end - clock_start) / CLOCKS_PER_SEC; 
+	printf("The operation completed successfully in %f sec.\n", cpu_time_taken);
 
 	std::vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
 	compression_params.push_back(9);
 
 	imwrite(argv[3], mat_out, compression_params);
+
+	printf("Exported the result to %s.\n", argv[3]);
 
 	return EXIT_SUCCESS;
 }
