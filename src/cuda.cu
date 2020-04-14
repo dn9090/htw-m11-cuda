@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include "shared.hpp"
 
@@ -10,61 +10,6 @@
 
 /* Return if the idx is out of bounds of the array size. */ 
 #define IDX_GUARD(size_x, size_y, idx) if((size_x * size_y) <= idx) return
-
-
-/*
- * Get the number of CUDA threads. 
- */
-dim3 cuda_threads()
-{
-	dim3 threads(32,32);
-	return threads;
-}
-
-/*
- * Get the number of CUDA blocks. 
- */
-dim3 cuda_blocks(uint32_t x, uint32_t y, dim3 threads)
-{
-	dim3 blocks((x / threads.x + 1), (y / threads.y + 1));
-	return blocks;
-}
-
-/*
- * Allocate generic CUDA memory.
- */
-uint32_t* allocate_cuda_buffer(uint32_t x, uint32_t y)
-{
-	size_t size = sizeof(uint32_t) * x * y;
-	uint32_t *buffer;
-	cudaMalloc((void **) &buffer, size);
-	return buffer;
-}
-
-/*
- * Allocate generic CUDA memory and copy the given data to the memory.
- */
-uint32_t* allocate_cuda__input_buffer(uint32_t x, uint32_t y, uint32_t *data)
-{
-	size_t size = sizeof(uint32_t) * x * y;
-	uint32_t *buffer = allocate_cuda_buffer(x, y);
-	cudaMemcpy(buffer, data, size, cudaMemcpyHostToDevice);
-	return buffer;
-}
-
-/*
- * Greyscales the colors of the image.
- */
-int op_grey(uint32_t width, uint32_t height, uint32_t *data)
-{
-	dim3 threads = cuda_threads();
-	dim3 blocks = cuda_blocks(width, height, threads);
-	uint32_t *in = allocate_cuda__input_buffer(width, height, data);
-	uint32_t *out = allocate_cuda_buffer(width, height);
-
-	op_kernel_grey<<<threads, blocks>>>(width, height, in, out);
-	return EXIT_SUCCESS;
-}
 
 /*
  * CUDA kernel for the grayscaling operation.
@@ -84,42 +29,57 @@ __global__ void op_kernel_grey(uint32_t width, uint32_t height, uint32_t *in, ui
 
 	out[idx] = RGBA32(color, color, color, alpha);
 }
-
-
-/*
- * Required filter information.
- */
-#define filter_size 5
-#define filter_pivot filter_size / 2
-#define filter_factor = 1.0f / 256.0f;
-#define filter_bias = 0.0f;
-__device__ float filter[filter_size][filter_size];
+#define OP_KERNEL_GREY 1
 
 /*
- * Applies a gaussian blur filter to the image.
+ * CUDA kernel for converting the rgba to hsv colorspace.
  */
-int op_blur(uint32_t width, uint32_t height, uint32_t *data)
+ __global__ void op_kernel_hsv(uint32_t width, uint32_t height, uint32_t *in, uint32_t *out)
 {
-	float filter_data[filter_size][filter_size] = 
+	uint32_t idx = IDX(blockIdx, blockDim, threadIdx, width);
+
+	IDX_GUARD(width, height, idx);
+
+	int32_t next = idx * 3; // hsv has only 3 channels
+	
+	/* Normalize color values except alpha. */
+	uint8_t red = RED8(in[idx]);
+	uint8_t green = GREEN8(in[idx]);
+	uint8_t blue = BLUE8(in[idx]);
+
+	/* Calulate conversion parameters */
+	uint8_t cmax = MAXRGB(red, green, blue);
+	uint8_t cmin = MINRGB(red, green, blue);
+	uint8_t diff = cmax - cmin;
+
+	/* Calculate hue. */
+	uint8_t hue = 0;
+
+	if(diff != 0)
 	{
-		{1.0f,  4.0f,  6.0f,  4.0f,  1.0f},
-		{4.0f, 16.0f, 24.0f, 16.0f,  4.0f},
-		{6.0f, 24.0f, 36.0f, 24.0f,  6.0f},
-		{4.0f, 16.0f, 24.0f, 16.0f,  4.0f},
-		{1.0f,  4.0f,  6.0f,  4.0f,  1.0f}
-	};
+		if(cmax == red)
+			hue = 43 * ((green - blue) / diff);
+		else if(cmax == green)
+			hue = 85 + 43 * ((blue - red) / diff);
+		else
+			hue = 171 + 43 * ((red - green) / diff);
+	}
 
-	cudaMemcpyToSymbol(filter, filter_data, filter_size * filter_size * sizeof(float));
+	/* Calculate saturation. */
+	uint8_t saturation = 0;
 
-	dim3 threads = cuda_threads();
-	dim3 blocks = cuda_blocks(width, height, threads);
-	uint32_t *in = allocate_cuda__input_buffer(width, height, data);
-	uint32_t *out = allocate_cuda_buffer(width, height);
+	if(cmax != 0)
+		saturation = 255 * diff / cmax;
+	
+	/* Calculate value. */
+	uint8_t value = cmax;
 
-	op_kernel_blur<<<threads, blocks>>>(width, height, in, out);
-
-	return EXIT_SUCCESS;
+	/* Write only three channels. */
+	((uint8_t *)out)[next++] = hue;
+	((uint8_t *)out)[next++] = saturation;
+	((uint8_t *)out)[next++] = value;
 }
+#define OP_KERNEL_HSV 2
 
 #define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
 
@@ -134,6 +94,21 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 	uint32_t idx = y * width + x;
 
 	IDX_GUARD(width, height, idx);
+
+	int32_t filter_size = 5;
+	int32_t filter_pivot = filter_size / 2;
+
+	float filter[filter_size][filter_size] =
+	{
+		{1.0f,  4.0f,  6.0f,  4.0f,  1.0f},
+		{4.0f, 16.0f, 24.0f, 16.0f,  4.0f},
+		{6.0f, 24.0f, 36.0f, 24.0f,  6.0f},
+		{4.0f, 16.0f, 24.0f, 16.0f,  4.0f},
+		{1.0f,  4.0f,  6.0f,  4.0f,  1.0f}
+	};
+
+	float filter_factor = 1.0f / 256.0f;
+	float filter_bias = 0.0f;
 
 	float red = 0, green = 0, blue = 0, alpha = 0;
 
@@ -167,14 +142,105 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 
 	out[index] = RGBA32((uint8_t)red, (uint8_t)green, (uint8_t)blue, (uint8_t)alpha);
 }
+#define OP_KERNEL_BLUR 3
 
+
+/*
+* Get the number of CUDA threads. 
+*/
+dim3 cuda_threads()
+{
+	dim3 threads(32,32);
+	return threads;
+}
+
+/*
+* Get the number of CUDA blocks. 
+*/
+dim3 cuda_blocks(uint32_t x, uint32_t y, dim3 threads)
+{
+	dim3 blocks((x / threads.x + 1), (y / threads.y + 1));
+	return blocks;
+}
+
+/*
+* Allocate generic CUDA memory.
+*/
+uint32_t* allocate_cuda_buffer(uint32_t x, uint32_t y)
+{
+	size_t size = sizeof(uint32_t) * x * y;
+	uint32_t *buffer;
+	cudaMalloc((void **) &buffer, size);
+	return buffer;
+}
+
+/*
+* Allocate generic CUDA memory and copy the given data to the memory.
+*/
+uint32_t* allocate_cuda__input_buffer(uint32_t x, uint32_t y, uint32_t *data)
+{
+	size_t size = sizeof(uint32_t) * x * y;
+	uint32_t *buffer = allocate_cuda_buffer(x, y);
+	cudaMemcpy(buffer, data, size, cudaMemcpyHostToDevice);
+	return buffer;
+}
+
+/*
+ * Executes and distributes the specified kernel.
+ */
+int execute_cuda_kernel(uint32_t kernel, uint32_t width, uint32_t height, uint32_t *data)
+{
+	dim3 threads = cuda_threads();
+	dim3 blocks = cuda_blocks(width, height, threads);
+	uint32_t *in = allocate_cuda__input_buffer(width, height, data);
+	uint32_t *out = allocate_cuda_buffer(width, height);
+
+	switch(kernel)
+	{
+		case OP_KERNEL_GREY:
+			op_kernel_grey<<<threads, blocks>>>(width, height, in, out);
+			break;
+		case OP_KERNEL_BLUR:
+			op_kernel_blur<<<threads, blocks>>>(width, height, in, out);
+			break;
+		case OP_KERNEL_HSV:
+			op_kernel_hsv<<<threads, blocks>>>(width, height, in, out);
+			break;
+		default:
+			return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+/*
+ * Greyscales the colors of the image.
+ */
+int op_grey(uint32_t width, uint32_t height, uint32_t *data)
+{
+	return execute_cuda_kernel(OP_KERNEL_GREY, width, height, data);
+}
+
+/*
+ * Converts the colorspace from rgba to hsv.
+ */
 int op_hsv(uint32_t width, uint32_t height, uint32_t *data)
 {
-	return EXIT_SUCCESS;
+	return execute_cuda_kernel(OP_KERNEL_HSV, width, height, data);
 }
 
+/*
+ * Applies a emboss filter to the image.
+ */
 int op_emboss(uint32_t width, uint32_t height, uint32_t *data)
 {
-	return EXIT_SUCCESS;
+	return execute_cuda_kernel(0, width, height, data);
 }
 
+/*
+ * Applies a gaussian blur filter to the image.
+ */
+int op_blur(uint32_t width, uint32_t height, uint32_t *data)
+{
+	return execute_cuda_kernel(OP_KERNEL_BLUR, width, height, data);
+}

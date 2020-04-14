@@ -44,14 +44,14 @@ int op_grey(uint32_t width, uint32_t height, uint32_t *data)
  */
 int op_hsv(uint32_t width, uint32_t height, uint32_t *data)
 {
-	int32_t next = 0;
-
 	for(int32_t row = 0; row < height; ++row)
 	{
 		for(int32_t col = 0; col < width; ++col)
 		{
 			uint32_t index = ARRAY2_IDX(row, col, width);
 			
+			int32_t next = index * 3; // hsv has only 3 channels
+
 			/* Normalize color values except alpha. */
 			uint8_t red = RED8(data[index]);
 			uint8_t green = GREEN8(data[index]);

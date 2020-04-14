@@ -66,28 +66,30 @@ int main(int argc, char **argv)
 	
 	ios_base::sync_with_stdio(false); 
 
+	int success = EXIT_FAILURE;
+
 	if(OPT(argv[1], "grey"))
 	{
 		clock_start = clock();
-		op_grey(mat_in.cols, mat_in.rows, im);
+		success = op_grey(mat_in.cols, mat_in.rows, im);
 		clock_end = clock();
 
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
 	} else if(OPT(argv[1], "emboss")) {
 		clock_start = clock();
-		op_emboss(mat_in.cols, mat_in.rows, im);
+		success = op_emboss(mat_in.cols, mat_in.rows, im);
 		clock_end = clock();
 
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
 	} else if(OPT(argv[1], "blur")) {
 		clock_start = clock();
-		op_blur(mat_in.cols, mat_in.rows, im);
+		success = op_blur(mat_in.cols, mat_in.rows, im);
 		clock_end = clock();
 
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
 	} else if(OPT(argv[1], "hsv")) {
 		clock_start = clock();
-		op_hsv(mat_in.cols, mat_in.rows, im);
+		success = op_hsv(mat_in.cols, mat_in.rows, im);
 		clock_end = clock();
 
 		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC3, im);
@@ -97,6 +99,12 @@ int main(int argc, char **argv)
 	}
 
 	ios_base::sync_with_stdio(true);
+
+	if(success != EXIT_SUCCESS)
+	{
+		printf("The operation failed.\n");
+		return EXIT_FAILURE;
+	}
 
 	double cpu_time_taken = double(clock_end - clock_start) / CLOCKS_PER_SEC; 
 	printf("The operation completed successfully in %f sec.\n", cpu_time_taken);
