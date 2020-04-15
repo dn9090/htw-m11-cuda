@@ -96,6 +96,9 @@ int main(int argc, char **argv)
 		Mat tmp = Mat(mat_in.rows, mat_in.cols, CV_8UC3);
 		cvtColor(mat_out, tmp, COLOR_HSV2RGB);
 		mat_out = tmp;
+	} else {
+		printf("The operation %s is not available.\n", argv[1]);
+		return EXIT_FAILURE;
 	}
 
 	ios_base::sync_with_stdio(true);
