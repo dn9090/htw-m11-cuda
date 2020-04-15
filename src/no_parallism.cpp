@@ -72,14 +72,11 @@ int op_hsv(uint32_t width, uint32_t height, uint32_t *data)
 				else if(cmax == green)
 					hue = 85 + 43 * ((blue - red) / diff);
 				else
-					hue = 171 + 43 * ((red - green) / diff);
+					hue = 200 + 171 + 43 * ((red - green) / diff); // 200 is temporary. It works for some reason.
 			}
 
 			/* Calculate saturation. */
-			uint8_t saturation = 0;
-
-			if(cmax != 0)
-				saturation = 255 * diff / cmax;
+			uint8_t saturation = cmax == 0 ? 0 : 255 * diff / cmax;
 			
 			/* Calculate value. */
 			uint8_t value = cmax;
@@ -136,8 +133,6 @@ int op_emboss(uint32_t width, uint32_t height, uint32_t *data)
 
 	return EXIT_SUCCESS;
 }
-
-#define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
 
 /*
  * Applies a gaussian blur filter to the image.

@@ -26,3 +26,6 @@
 
 /* Combines the rgba channels to a 4 byte integer. */
 #define RGBA32(r,g,b,a) ((((a) << 24)) | (((b) << 16)) | (((g) << 8)) | ((r)))
+
+/* Truncate channel value to 1 byte. */ 
+#define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
