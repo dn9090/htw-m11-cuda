@@ -12,8 +12,8 @@
 #define IDX_GUARD(size_x, size_y, idx) if((size_x * size_y) <= idx) return
 
 /* Basic inlined math operations for the rgb format. */
-#define MAXRGB8(r,g,b) ((uint_8) fmaxf(fmaxf((float)r, (float)g), (float)b))
-#define MINRGB8(r,g,b) ((uint_8) fminf(fminf((float)r, (float)g), (float)b))
+#define MAXRGB8(r,g,b) ((uint8_t) fmaxf(fmaxf((float)r, (float)g), (float)b))
+#define MINRGB8(r,g,b) ((uint8_t) fminf(fminf((float)r, (float)g), (float)b))
 
 /*
  * CUDA kernel for the grayscaling operation.
