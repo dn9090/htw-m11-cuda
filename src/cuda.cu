@@ -93,8 +93,8 @@ __global__ void op_kernel_grey(uint32_t width, uint32_t height, uint32_t *in, ui
 
 	IDX_GUARD(width, height, idx);
 
-	int32_t filter_size = 5;
-	int32_t filter_pivot = filter_size / 2;
+	const int32_t filter_size = 5;
+	const int32_t filter_pivot = filter_size / 2;
 
 	float filter[filter_size][filter_size] =
 	{
@@ -171,17 +171,12 @@ int execute_cuda_kernel(uint32_t kernel, uint32_t width, uint32_t height, uint32
 {
 	size_t size = sizeof(uint32_t) * width * height;
 
-	uint32_t *in, *out;
-
-	void *vin = in, *vout = out; /* avoid undefined behaviour, see http://www.c-faq.com/ptrs/genericpp.html */
+	uint32_t *in, *out; /* avoid undefined behaviour, see http://www.c-faq.com/ptrs/genericpp.html */
 
 	/* Allocate CUDA buffers. */
-	CUDA_ERROR_CHECK(cudaMalloc(&vin, size));
-	CUDA_ERROR_CHECK(cudaMalloc(&vout, size));
+	CUDA_ERROR_CHECK(cudaMalloc((void **) &in, size));
+	CUDA_ERROR_CHECK(cudaMalloc((void **) &out, size));
 	CUDA_ERROR_CHECK(cudaMemcpy(in, data, size, cudaMemcpyHostToDevice));
-
-	in = vin;
-	out = vout;
 
 	/* Define distribution levels. */
 	dim3 threads(32,32);

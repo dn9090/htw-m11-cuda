@@ -137,8 +137,8 @@ int op_emboss(uint32_t width, uint32_t height, uint32_t *data)
  */
 int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 {
-	int32_t filter_size = 5;
-	int32_t filter_pivot = filter_size / 2;
+	const int32_t filter_size = 5;
+	const int32_t filter_pivot = filter_size / 2;
 
 	/*
 	double filter[filter_size][filter_size] =
