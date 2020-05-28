@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "shared.hpp"
 
 /* Get the position of a two dimensional flat array. */

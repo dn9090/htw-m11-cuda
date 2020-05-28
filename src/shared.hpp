@@ -33,5 +33,5 @@
 #ifdef __NVCC__
 #define TRUNCATE_CHANNEL(value,factor,bias) fminf(fmaxf(factor * value + bias, 0.0f), 255.0f)
 #else
-#define TRUNCATE_CHANNEL(value,factor,bias) fminf(fmaxf(factor * value + bias, 0.0f), 255.0f)
+#define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
 #endif
