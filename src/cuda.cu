@@ -138,7 +138,7 @@ __global__ void op_kernel_grey(uint32_t width, uint32_t height, uint32_t *in, ui
 	blue = TRUNCATE_CHANNEL(blue, filter_factor, filter_bias);
 	alpha = TRUNCATE_CHANNEL(alpha, filter_factor, filter_bias);
 
-	out[index] = RGBA32((uint8_t)red, (uint8_t)green, (uint8_t)blue, (uint8_t)alpha);
+	out[idx] = RGBA32((uint8_t)red, (uint8_t)green, (uint8_t)blue, (uint8_t)alpha);
 }
 #define OP_KERNEL_BLUR 3
 

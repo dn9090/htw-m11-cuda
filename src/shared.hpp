@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math.h>
+
 /*
  * Common bit operations for the rgba family.
  * The pixel format is specified as uint32_t 

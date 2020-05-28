@@ -2,11 +2,14 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <algorithm>
-#include <cmath>
 #include "shared.hpp"
 
 /* Get the position of a two dimensional flat array. */
 #define ARRAY2_IDX(a,b,size) (a * size) + b
+
+/* Basic inlined math operations for the rgb format. */
+#define MAXRGB(r,g,b) (std::max(std::max(r, g), b))
+#define MINRGB(r,g,b) (std::min(std::min(r, g), b))
 
 using namespace std;
 
