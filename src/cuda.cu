@@ -11,6 +11,10 @@
 /* Return if the idx is out of bounds of the array size. */ 
 #define IDX_GUARD(size_x, size_y, idx) if((size_x * size_y) <= idx) return
 
+/* Basic inlined math operations for the rgb format. */
+#define MAXRGB8(r,g,b) ((uint_8) fmaxf(fmaxf((float)r, (float)g), (float)b))
+#define MINRGB8(r,g,b) ((uint_8) fminf(fminf((float)r, (float)g), (float)b))
+
 /*
  * CUDA kernel for the grayscaling operation.
  */
@@ -48,8 +52,8 @@ __global__ void op_kernel_grey(uint32_t width, uint32_t height, uint32_t *in, ui
 	uint8_t blue = BLUE8(in[idx]);
 
 	/* Calulate conversion parameters */
-	uint8_t cmax = MAXRGB(red, green, blue);
-	uint8_t cmin = MINRGB(red, green, blue);
+	uint8_t cmax = MAXRGB8(red, green, blue);
+	uint8_t cmin = MINRGB8(red, green, blue);
 	uint8_t diff = cmax - cmin;
 
 	/* Calculate hue. */
