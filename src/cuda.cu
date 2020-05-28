@@ -157,7 +157,7 @@ dim3 cuda_blocks(uint32_t x, uint32_t y, dim3 threads)
  */
 #define CUDA_ERROR_CHECK(call) {\
 	cudaError_t error = call;\
-	if(error != SUCCESS)\
+	if(error != cudaSuccess)\
 	{\
 		printf("CUDA error %d in %s line %d: %s", error, __FILE__, __LINE__, cudaGetErrorString(error));\
 		return EXIT_FAILURE;\
@@ -173,10 +173,15 @@ int execute_cuda_kernel(uint32_t kernel, uint32_t width, uint32_t height, uint32
 
 	uint32_t *in, *out;
 
+	void *vin = in, *vout = out; /* avoid undefined behaviour, see http://www.c-faq.com/ptrs/genericpp.html */
+
 	/* Allocate CUDA buffers. */
-	CUDA_ERROR_CHECK(cudaMalloc((void **)&in, size));
-	CUDA_ERROR_CHECK(cudaMalloc((void **)&out, size));
+	CUDA_ERROR_CHECK(cudaMalloc(&vin, size));
+	CUDA_ERROR_CHECK(cudaMalloc(&vout, size));
 	CUDA_ERROR_CHECK(cudaMemcpy(in, data, size, cudaMemcpyHostToDevice));
+
+	in = vin;
+	out = vout;
 
 	/* Define distribution levels. */
 	dim3 threads(32,32);

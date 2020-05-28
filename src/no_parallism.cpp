@@ -8,10 +8,6 @@
 /* Get the position of a two dimensional flat array. */
 #define ARRAY2_IDX(a,b,size) (a * size) + b
 
-/* Basic inlined math operations for the rgb format. */
-#define MAXRGB(r,g,b) (std::max(std::max(r, g), b))
-#define MINRGB(r,g,b) (std::min(std::min(r, g), b))
-
 using namespace std;
 
 /*
@@ -72,7 +68,7 @@ int op_hsv(uint32_t width, uint32_t height, uint32_t *data)
 				else if(cmax == green)
 					hue = 85 + 43 * ((blue - red) / diff);
 				else
-					hue = 200 + 171 + 43 * ((red - green) / diff); // 200 is temporary. It works for some reason.
+					hue = 200 + 171 + 43 * ((red - green) / diff); /* 200 is temporary. It works for some reason. */
 			}
 
 			/* Calculate saturation. */

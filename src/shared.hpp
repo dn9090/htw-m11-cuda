@@ -29,3 +29,7 @@
 
 /* Truncate channel value to 1 byte. */ 
 #define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
+
+/* Basic inlined math operations for the rgb format. */
+#define MAXRGB(r,g,b) (std::max(std::max(r, g), b))
+#define MINRGB(r,g,b) (std::min(std::min(r, g), b))
