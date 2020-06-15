@@ -74,6 +74,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	printf("The implementation uses CImg.\n");
+
 	CImg<unsigned char> img(argv[2]);
 
 	uint32_t width = img.width();

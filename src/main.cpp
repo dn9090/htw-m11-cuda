@@ -49,6 +49,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	printf("The implementation uses OpenCV.\n");
+
 	Mat mat_in = imread(argv[2], CV_LOAD_IMAGE_UNCHANGED);
 	
 	if(mat_in.empty())

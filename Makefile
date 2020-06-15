@@ -12,11 +12,17 @@ no_parallism: pre-build
 no_parallism_cimg: pre-build
 	$(GCC) -x c++ src/no_parallism.cpp src/main_cimg.cpp -lpng -ljpeg -o bin/image_modifier_no_parallism
 
+no_parallism_lodepng: pre-build
+	$(GCC) -x c++ src/no_parallism.cpp src/main_lodepng.cpp src/lodepng/lodepng.cpp -o bin/image_modifier_no_parallism
+
 cuda: pre-build
 	$(NVCC) -arch=$(CUDA_ARCH) -x cu src/cuda.cu src/main.cpp $(LD) -o bin/image_modifier_cuda
 
 cuda_cimg: pre-build
 	$(NVCC) -arch=$(CUDA_ARCH) -x cu src/cuda.cu src/main_cimg.cpp -lpng -ljpeg -o bin/image_modifier_cuda
+
+cuda_lodepng: pre-build
+	$(NVCC) -arch=$(CUDA_ARCH) -x cu src/cuda.cu src/main_lodepng.cpp src/lodepng/lodepng.cpp -o bin/image_modifier_cuda
 
 all: no_parallism cuda
 
