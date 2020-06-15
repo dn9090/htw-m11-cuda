@@ -57,7 +57,11 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	printf("Loaded file %s with %d rows, %d columns and %d channels.\n", argv[2], mat_in.rows, mat_in.cols, mat_in.channels());
+	uint32_t width = mat_in.cols;
+	uint32_t height = mat_in.rows;
+	uint32_t channels = mat_in.channels();
+
+	printf("Loaded file %s with %d rows, %d columns and %d channels.\n", argv[2], height, width, channels);
 
 	uint32_t *im = mat_to_flat_array(mat_in);
 	Mat mat_out;
@@ -71,29 +75,29 @@ int main(int argc, char **argv)
 	if(OPT(argv[1], "grey"))
 	{
 		clock_start = clock();
-		success = op_grey(mat_in.cols, mat_in.rows, im);
+		success = op_grey(width, height, im);
 		clock_end = clock();
 
-		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
+		mat_out = Mat(height, width, CV_8UC4, im);
 	} else if(OPT(argv[1], "emboss")) {
 		clock_start = clock();
-		success = op_emboss(mat_in.cols, mat_in.rows, im);
+		success = op_emboss(width, height, im);
 		clock_end = clock();
 
-		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
+		mat_out = Mat(height, width, CV_8UC4, im);
 	} else if(OPT(argv[1], "blur")) {
 		clock_start = clock();
-		success = op_blur(mat_in.cols, mat_in.rows, im);
+		success = op_blur(width, height, im);
 		clock_end = clock();
 
-		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC4, im);
+		mat_out = Mat(height, width, CV_8UC4, im);
 	} else if(OPT(argv[1], "hsv")) {
 		clock_start = clock();
-		success = op_hsv(mat_in.cols, mat_in.rows, im);
+		success = op_hsv(width, height, im);
 		clock_end = clock();
 
-		mat_out = Mat(mat_in.rows, mat_in.cols, CV_8UC3, im);
-		Mat tmp = Mat(mat_in.rows, mat_in.cols, CV_8UC3);
+		mat_out = Mat(height, width, CV_8UC3, im);
+		Mat tmp = Mat(height, width, CV_8UC3);
 		cvtColor(mat_out, tmp, COLOR_HSV2RGB);
 		mat_out = tmp;
 	} else {
