@@ -33,7 +33,8 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	uint32_t *im = (uint32_t *)malloc(sizeof(uint32_t) * (image_height * image_width));
+	uint32_t pixels = image_height * image_width;
+	uint32_t *im = (uint32_t *)malloc(sizeof(uint32_t) * (pixels));
 	int offset = 0;
 
 	for(int i = 0; i < image.size(); i += 4)
@@ -87,7 +88,17 @@ int main(int argc, char **argv)
 	double cpu_time_taken = double(clock_end - clock_start) / CLOCKS_PER_SEC; 
 	printf("The operation completed successfully in %f sec.\n", cpu_time_taken);
 
-	if(lodepng_encode32_file(argv[3], (unsigned char*)im, width, height))
+	std::vector<unsigned char> output;
+
+	for(int i = 0; i < pixels; ++i)
+	{
+		output.push_back(RED8(im[i]));
+		output.push_back(GREEN8(im[i]));
+		output.push_back(BLUE8(im[i]));
+		output.push_back(ALPHA8(im[i]));
+	}
+
+	if(lodepng::encode(argv[3], output, width, height))
 	{
 		printf("Export failed.\n");
 		return EXIT_FAILURE;
