@@ -98,9 +98,10 @@ int main(int argc, char **argv)
 		output.push_back(ALPHA8(im[i]));
 	}
 
-	if(lodepng::encode(argv[3], output, width, height))
+	if(unsigned error = lodepng::encode(argv[3], output, width, height))
 	{
 		printf("Export failed.\n");
+		printf("%s", lodepng_error_text(error));
 		return EXIT_FAILURE;
 	}
 
