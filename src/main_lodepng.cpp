@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 	if(unsigned error = lodepng::encode(argv[3], output, width, height))
 	{
 		printf("Export failed.\n");
-		printf("%s", lodepng_error_text(error));
+		printf("%s\n", lodepng_error_text(error));
 		return EXIT_FAILURE;
 	}
 
