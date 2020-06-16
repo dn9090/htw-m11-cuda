@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 
 	std::vector<int> compression_params;
 	compression_params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-	compression_params.push_back(9);
+	compression_params.push_back(0);
 
 	imwrite(argv[3], mat_out, compression_params);
 

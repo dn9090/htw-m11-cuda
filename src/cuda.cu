@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include "shared.hpp"
 
-/* Get the position of a two dimensional flat array. */
-#define ARRAY2_IDX(a,b,size) (a * size) + b
-
 /* Get the index via the CUDA block and thread index. */
 #define IDX(bIdx,bDim,tIdx,size) ARRAY2_IDX((bIdx.y * bDim.y + tIdx.y),((bIdx.x * bDim.x) + tIdx.x), size)
 

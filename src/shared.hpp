@@ -35,3 +35,6 @@
 #else
 #define TRUNCATE_CHANNEL(value,factor,bias) std::min(std::max(factor * value + bias, 0.0f), 255.0f)
 #endif
+
+/* Get the position of a two dimensional flat array. */
+#define ARRAY2_IDX(a,b,size) (a * size) + b

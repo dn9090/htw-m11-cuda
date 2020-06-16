@@ -2,10 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <algorithm>
+#include <string.h>
 #include "shared.hpp"
-
-/* Get the position of a two dimensional flat array. */
-#define ARRAY2_IDX(a,b,size) (a * size) + b
 
 /* Basic inlined math operations for the rgb format. */
 #define MAXRGB(r,g,b) (std::max(std::max(r, g), b))
@@ -164,6 +162,8 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 	float filter_factor = 1.0f / 256.0f;
 	float filter_bias = 0.0f;
 
+	uint32_t *out = (uint32_t *)malloc(sizeof(uint32_t) * (height * width));
+
 	for(int32_t row = height - 1; row >= 0; --row)
 	{
 		for(int32_t col = width - 1; col >= 0; --col)
@@ -200,9 +200,12 @@ int op_blur(uint32_t width, uint32_t height, uint32_t *data)
 			blue = TRUNCATE_CHANNEL(blue, filter_factor, filter_bias);
 			alpha = TRUNCATE_CHANNEL(alpha, filter_factor, filter_bias);
 
-			data[index] = RGBA32((uint8_t)red, (uint8_t)green, (uint8_t)blue, (uint8_t)alpha);
+			out[index] = RGBA32((uint8_t)red, (uint8_t)green, (uint8_t)blue, (uint8_t)alpha);
 		}
 	}
+
+	memcpy(data, out, sizeof(uint32_t) * height * width); 
+	free(out);
 
 	return EXIT_SUCCESS;
 }
