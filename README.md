@@ -24,3 +24,6 @@ The Makefile contains the recipe *no_parallism* for the first and *cuda* for the
 If you want to build and test the first project run the shell script *run_no_parallism.sh*.
 
 The third project is build via dotnet core run.
+
+## Documentation
+Can be found [here](docs/Documentation.md).

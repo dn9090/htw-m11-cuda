@@ -73,6 +73,7 @@ It generates a output image that contains the pixel color difference of two imag
 Note that the alpha channel is ignored.
 
 An example output for the operation `compare_images.py export/example_image1_small_blur.png export/example_image1_small_emboss.png export/difference_example_image1.png` can be seen here:
+
 ![Color difference](difference.png)
 
 ## Operations
@@ -88,6 +89,7 @@ The operation greyscales the image colors. The alpha channel stays untouched.
 Returns `EXIT_SUCCESS` if the operation was successful otherwise `EXIT_FAILURE`. 
 
 Example output:
+
 ![Greyscale](grey.png)
 
 ### HSV
@@ -111,6 +113,7 @@ else
 Returns `EXIT_SUCCESS` if the operation was successful otherwise `EXIT_FAILURE`. 
 
 Example output:
+
 ![HSV](hsv.png)
 
 ### Gaussian Blur
@@ -145,6 +148,7 @@ Again, this is filter is only an approximation.
 Returns `EXIT_SUCCESS` if the operation was successful otherwise `EXIT_FAILURE`. 
 
 Example output:
+
 ![Gaussian Blur](blur.png)
 
 ### Emboss
@@ -157,4 +161,5 @@ The filter calculates the differences between two pixel color values and looks f
 Returns `EXIT_SUCCESS` if the operation was successful otherwise `EXIT_FAILURE`. 
 
 Example output:
+
 ![Emboss](emboss.png)
