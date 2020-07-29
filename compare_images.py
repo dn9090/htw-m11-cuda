@@ -3,7 +3,7 @@ import sys
 from PIL import Image, ImageChops
 
 if len(sys.argv) < 4:
-	print('usage: %s <first file> <second file> <output file>\n\n' % ())
+	print('usage: %s <first file> <second file> <output file>\n' % (sys.argv[0]))
 	exit(1)
 
 
